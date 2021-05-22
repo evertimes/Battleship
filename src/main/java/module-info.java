@@ -6,4 +6,6 @@ module org.evertimes {
 
     opens org.evertimes to javafx.fxml;
     exports org.evertimes;
+    exports org.evertimes.ships;
+    opens org.evertimes.ships to javafx.fxml;
 }

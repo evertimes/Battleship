@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,6 +14,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import org.evertimes.ships.ShipImpl;
 
 public class SecondaryController implements Initializable {
     public Canvas userField;
@@ -24,7 +26,7 @@ public class SecondaryController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         userBattleField = App.getBattleField();
         computerBattleField = new BattleField();
-        computerBattleField.generateComputerBattleField();
+        computerBattleField.generateBattleField();
         CellState[][] cs = computerBattleField.field;
         drawShips(userBattleField, userField);
         drawGrid(userField);
@@ -62,45 +64,6 @@ public class SecondaryController implements Initializable {
         }
     }
 
-    List<String> getCords(int x, int y) {
-        ArrayList<String> cords = new ArrayList<>();
-        cords.add(x + "" + y);
-        for (int i = 1; i < 3; i++) {
-            if (computerBattleField.field[x + i][y] == CellState.DESTROYED ||
-                    computerBattleField.field[x + i][y] == CellState.SHIP) {
-                cords.add(x + "" + y);
-            } else {
-                break;
-            }
-        }
-        for (int i = 1; i < 3; i++) {
-            if (computerBattleField.field[x - i][y] == CellState.DESTROYED
-                    ||
-                    computerBattleField.field[x - i][y] == CellState.SHIP) {
-                cords.add(x + "" + y);
-            } else {
-                break;
-            }
-        }
-        for (int i = 1; i < 3; i++) {
-            if (computerBattleField.field[x][y + 1] == CellState.DESTROYED ||
-                    computerBattleField.field[x][y + 1] == CellState.SHIP) {
-                cords.add(x + "" + y);
-            } else {
-                break;
-            }
-        }
-        for (int i = 1; i < 3; i++) {
-            if (computerBattleField.field[x][y - 1] == CellState.DESTROYED ||
-                    computerBattleField.field[x][y-1] == CellState.SHIP) {
-                cords.add(x + "" + y);
-            } else {
-                break;
-            }
-        }
-
-        return cords;
-    }
 
     public void pressComputerCell(MouseEvent mouseEvent) {
         int x = (int) Math.round(mouseEvent.getX());
@@ -109,36 +72,17 @@ public class SecondaryController implements Initializable {
         y = y / 50;
         int state = fireCell(x, y);
         if (state == 1) {
-            List<String> cords = getCords(x, y);
-            for (String cord : cords) {
-                int localx = Integer.parseInt(cord.substring(0, 1));
-                int localy = Integer.parseInt(cord.substring(1, 2));
-                if (computerBattleField.field[localx + 1][localy] != CellState.DESTROYED) {
-                    computerBattleField.field[localx + 1][localy] = CellState.CHECKED;
+            List<ShipImpl> ships = computerBattleField.getShips();
+            ShipImpl ship = null;
+            for (ShipImpl sh : ships) {
+                if (sh.isContains(new Point(x, y))) {
+                    ship = sh;
+                    break;
                 }
-                if (computerBattleField.field[localx - 1][localy] != CellState.DESTROYED) {
-                    computerBattleField.field[localx - 1][localy] = CellState.CHECKED;
-                }
-                if (computerBattleField.field[localx][localy + 1] != CellState.DESTROYED) {
-                    computerBattleField.field[localx][localy + 1] = CellState.CHECKED;
-                }
-                if (computerBattleField.field[localx][localy - 1] != CellState.DESTROYED) {
-                    computerBattleField.field[localx][localy - 1] = CellState.CHECKED;
-                }
-                /*if(computerBattleField.field[localx+1][localy-1] != CellState.DESTROYED){
-                    computerBattleField.field[localx+1][localy-1] = CellState.CHECKED;
-                }
-                if(computerBattleField.field[localx-1][localy-1] != CellState.DESTROYED){
-                    computerBattleField.field[localx-1][localy-1] = CellState.CHECKED;
-                }
-                if(computerBattleField.field[localx][localy-1] != CellState.DESTROYED){
-                    computerBattleField.field[localx][localy-1] = CellState.CHECKED;
-                }*/
-                computerBattleField.field[localx + 1][localy - 1] = CellState.CHECKED;
-                computerBattleField.field[localx + 1][localy + 1] = CellState.CHECKED;
-                computerBattleField.field[localx - 1][localy + 1] = CellState.CHECKED;
-                computerBattleField.field[localx - 1][localy - 1] = CellState.CHECKED;
-
+            }
+            Set<Point> cords = ship.getRadiusCords();
+            for (Point cord : cords) {
+                computerBattleField.field[cord.getX()][cord.getY()] = CellState.CHECKED;
             }
         }
         drawComputerShips(computerBattleField, computerField);
@@ -169,14 +113,21 @@ public class SecondaryController implements Initializable {
     public int fireCell(int x, int y) {
         if (computerBattleField.field[x][y] == CellState.SHIP) {
             computerBattleField.field[x][y] = CellState.DESTROYED;
-            if (computerBattleField.field[x + 1][y] == CellState.SHIP ||
-                    computerBattleField.field[x - 1][y] == CellState.SHIP ||
-                    computerBattleField.field[x][y + 1] == CellState.SHIP ||
-                    computerBattleField.field[x][y - 1] == CellState.SHIP) {
-                return 0;
-            } else {
-                return 1;
+            List<ShipImpl> ships = computerBattleField.getShips();
+            ShipImpl ship = null;
+            for (ShipImpl sh : ships) {
+                if (sh.isContains(new Point(x, y))) {
+                    ship = sh;
+                    break;
+                }
             }
+            ship.removePoint();
+            if(ship.isDestroyed()){
+                return 1;
+            }else{
+                return 0;
+            }
+
         } else if (computerBattleField.field[x][y] == CellState.REGULAR) {
             computerBattleField.field[x][y] = CellState.CHECKED;
         }

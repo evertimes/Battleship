@@ -1,24 +1,32 @@
 package org.evertimes;
 
+import org.evertimes.ships.ShipImpl;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class BattleField {
     CellState[][] field = new CellState[10][10];
-
+    ArrayList<ShipImpl> ships = new ArrayList();
     private int lincoreCounter = 0;
     private int cruiserCounter = 0;
     private int destroyersCounter = 0;
     private int boatCounter = 0;
 
     BattleField() {
-
         for (CellState[] row : field) {
             Arrays.fill(row, CellState.REGULAR);
         }
     }
 
-    public void generateComputerBattleField() {
+    public ArrayList<ShipImpl> getShips() {
+        return ships;
+    }
+
+    public void generateBattleField() {
         var rnd = new Random();
         int x;
         int y;
@@ -58,37 +66,39 @@ public class BattleField {
     void addShip(int x, int y, int size, int direction) {
         if (checkCanAdd(x, y, size, direction)) {
             if (size == 4 && lincoreCounter < 1) {
-                //size = 4;
                 lincoreCounter++;
             } else if (size == 3 && cruiserCounter < 2) {
-                //size = 3;
                 cruiserCounter++;
             } else if (size == 2 && destroyersCounter < 3) {
-                //size = 2;
                 destroyersCounter++;
             } else if (size == 1 && boatCounter < 4) {
-                //size = 1;
                 boatCounter++;
             } else {
                 return;
             }
+            Set<Point> pointSet = new HashSet<>();
             if (direction == 0) {
                 for (int i = 0; i < size; i++) {
+                    pointSet.add(new Point(x,y-i));
                     field[x][y - i] = CellState.SHIP;
                 }
             } else if (direction == 2) {
                 for (int i = 0; i < size; i++) {
+                    pointSet.add(new Point(x,y+i));
                     field[x][y + i] = CellState.SHIP;
                 }
             } else if (direction == 3) {
                 for (int i = 0; i < size; i++) {
+                    pointSet.add(new Point(x-i,y));
                     field[x - i][y] = CellState.SHIP;
                 }
             } else if (direction == 1) {
                 for (int i = 0; i < size; i++) {
+                    pointSet.add(new Point(x+i,y));
                     field[x + i][y] = CellState.SHIP;
                 }
             }
+            ships.add(new ShipImpl(pointSet,size));
         }
     }
 
