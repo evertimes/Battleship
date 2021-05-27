@@ -1,9 +1,8 @@
 package org.evertimes;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -14,20 +13,28 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import org.evertimes.ships.ShipImpl;
+import org.evertimes.ships.Ship;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 public class SecondaryController implements Initializable {
     public Canvas userField;
     public Canvas computerField;
     BattleField userBattleField;
     BattleField computerBattleField;
+    boolean checkNear = false;
+    boolean foundDirection = false;
+    Point lastPoint;
+    Point firstPoint;
+    int direction = 0;
+    Media sound;
+    MediaPlayer mediaPlayer;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         userBattleField = App.getBattleField();
         computerBattleField = new BattleField();
         computerBattleField.generateBattleField();
-        CellState[][] cs = computerBattleField.field;
         drawShips(userBattleField, userField);
         drawGrid(userField);
         drawComputerShips(computerBattleField, computerField);
@@ -72,14 +79,7 @@ public class SecondaryController implements Initializable {
         y = y / 50;
         int state = fireCell(x, y);
         if (state == 1) {
-            List<ShipImpl> ships = computerBattleField.getShips();
-            ShipImpl ship = null;
-            for (ShipImpl sh : ships) {
-                if (sh.isContains(new Point(x, y))) {
-                    ship = sh;
-                    break;
-                }
-            }
+            Ship ship = computerBattleField.getShip(new Point(x, y));
             Set<Point> cords = ship.getRadiusCords();
             for (Point cord : cords) {
                 computerBattleField.field[cord.getX()][cord.getY()] = CellState.CHECKED;
@@ -88,17 +88,14 @@ public class SecondaryController implements Initializable {
         drawComputerShips(computerBattleField, computerField);
         drawGrid(computerField);
         if (checkEndGame(computerBattleField)) {
-            userField.getGraphicsContext2D().clearRect(0, 0, 500, 500);
-            userField.getGraphicsContext2D().setStroke(Color.BLACK);
-            computerField.getGraphicsContext2D().setStroke(Color.BLACK);
-            userField.getGraphicsContext2D().setFont(Font.font(java.awt.Font.SANS_SERIF, 25));
-            userField.getGraphicsContext2D().strokeText("You win", 50, 250);
-            computerField.getGraphicsContext2D().setFont(Font.font(java.awt.Font.SANS_SERIF, 25));
-            computerField.getGraphicsContext2D().clearRect(0, 0, 500, 500);
-            computerField.getGraphicsContext2D().strokeText("Computer loose", 50, 250);
+            endGame();
             return;
         }
-        computerTurn();
+        if (!checkNear) {
+            computerTurn();
+        } else {
+            computerTurn(lastPoint);
+        }
         drawShips(userBattleField, userField);
         drawGrid(userField);
         if (checkEndGame(userBattleField)) {
@@ -110,28 +107,105 @@ public class SecondaryController implements Initializable {
         }
     }
 
+    private void endGame() {
+        userField.getGraphicsContext2D().clearRect(0, 0, 500, 500);
+        userField.getGraphicsContext2D().setStroke(Color.BLACK);
+        computerField.getGraphicsContext2D().setStroke(Color.BLACK);
+        userField.getGraphicsContext2D().setFont(Font.font(java.awt.Font.SANS_SERIF, 25));
+        userField.getGraphicsContext2D().strokeText("You win", 50, 250);
+        computerField.getGraphicsContext2D().setFont(Font.font(java.awt.Font.SANS_SERIF, 25));
+        computerField.getGraphicsContext2D().clearRect(0, 0, 500, 500);
+        computerField.getGraphicsContext2D().strokeText("Computer loose", 50, 250);
+    }
+
     public int fireCell(int x, int y) {
         if (computerBattleField.field[x][y] == CellState.SHIP) {
             computerBattleField.field[x][y] = CellState.DESTROYED;
-            List<ShipImpl> ships = computerBattleField.getShips();
-            ShipImpl ship = null;
-            for (ShipImpl sh : ships) {
-                if (sh.isContains(new Point(x, y))) {
-                    ship = sh;
-                    break;
-                }
-            }
+            Ship ship = computerBattleField.getShip(new Point(x, y));
             ship.removePoint();
-            if(ship.isDestroyed()){
+            if (ship.isDestroyed()) {
                 return 1;
-            }else{
+            } else {
                 return 0;
             }
-
         } else if (computerBattleField.field[x][y] == CellState.REGULAR) {
             computerBattleField.field[x][y] = CellState.CHECKED;
         }
         return 2;
+    }
+
+    void computerTurn(Point pt) {
+        int i = 0;
+        int j = 0;
+        switch (direction) {
+            case 0:
+                j = -1;
+                break;
+            case 1:
+                i = 1;
+                break;
+            case 2:
+                j = 1;
+                break;
+            case 3:
+                i = -1;
+                break;
+        }
+        if (pt.getY() == 0 && direction == 0 ||
+                pt.getX() == 9 && direction == 1 ||
+                pt.getY() == 9 && direction == 2 ||
+                pt.getX() == 0 && direction == 3) {
+            direction++;
+            direction = direction % 4;
+            computerTurn(pt);
+            return;
+        }
+        if (userBattleField.field[pt.getX() + i][pt.getY() + j] == CellState.SHIP) {
+            shipHandler(pt, i, j);
+        } else if (userBattleField.field[pt.getX() + i][pt.getY() + j] == CellState.REGULAR) {
+            regularHandler(pt, i, j);
+        } else if (userBattleField.field[pt.getX() + i][pt.getY() + j] == CellState.CHECKED) {
+            checkedHandler();
+            computerTurn(pt);
+        }
+    }
+
+    void shipHandler(Point pt, int i, int j) {
+        foundDirection = true;
+        userBattleField.field[pt.getX() + i][pt.getY() + j] = CellState.DESTROYED;
+        Ship sh = userBattleField.getShip(pt);
+        sh.removePoint();
+        lastPoint = new Point(pt.getX() + i, pt.getY() + j);
+        if (sh.isDestroyed()) {
+            Set<Point> cords = sh.getRadiusCords();
+            checkNear = false;
+            for (Point cord : cords) {
+                userBattleField.field[cord.getX()][cord.getY()] = CellState.CHECKED;
+            }
+            direction = 0;
+            foundDirection = false;
+        }
+    }
+
+    void regularHandler(Point pt, int i, int j) {
+        userBattleField.field[pt.getX() + i][pt.getY() + j] = CellState.CHECKED;
+        if (foundDirection) {
+            direction = (direction + 2) % 4;
+            lastPoint = firstPoint;
+        } else {
+            direction++;
+            direction = direction % 4;
+        }
+    }
+
+    void checkedHandler() {
+        if (foundDirection) {
+            direction = (direction + 2) % 4;
+            lastPoint = firstPoint;
+        } else {
+            direction++;
+            direction = direction % 4;
+        }
     }
 
     void computerTurn() {
@@ -145,6 +219,19 @@ public class SecondaryController implements Initializable {
                 userBattleField.field[x][y] == CellState.DESTROYED);
         if (userBattleField.field[x][y] == CellState.SHIP) {
             userBattleField.field[x][y] = CellState.DESTROYED;
+            Ship ship = userBattleField.getShip(new Point(x, y));
+            ship.removePoint();
+            if (ship.isDestroyed()) {
+                Set<Point> cords = ship.getRadiusCords();
+                checkNear = false;
+                for (Point cord : cords) {
+                    userBattleField.field[cord.getX()][cord.getY()] = CellState.CHECKED;
+                }
+            } else {
+                lastPoint = new Point(x, y);
+                firstPoint = new Point(x, y);
+                checkNear = true;
+            }
         } else if (userBattleField.field[x][y] == CellState.REGULAR) {
             userBattleField.field[x][y] = CellState.CHECKED;
         }
@@ -162,6 +249,9 @@ public class SecondaryController implements Initializable {
     }
 
     public void pressUserCell(MouseEvent mouseEvent) {
+        sound = new Media(new File("src/main/resources/org/evertimes/ff.mp3").toURI().toString());
+        mediaPlayer = new MediaPlayer(sound);
+        mediaPlayer.play();
     }
 
     @FXML

@@ -1,9 +1,12 @@
 package org.evertimes;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,7 +18,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 public class PrimaryController implements Initializable {
 
@@ -23,12 +31,10 @@ public class PrimaryController implements Initializable {
     public Canvas canvasOne;
     public ComboBox directionBox;
     public ComboBox typeBox;
-    public TextField cordBox;
+    public HBox hbox1;
     private BattleField bf = new BattleField();
-    private int lincoreCounter = 0;
-    private int cruiserCounter = 0;
-    private int destroyersCounter = 0;
-    private int boatCounter = 0;
+    Media sound;
+    MediaPlayer mediaPlayer;
 
     ObservableList listDirection = FXCollections.observableArrayList(
             "Вверх",
@@ -43,24 +49,18 @@ public class PrimaryController implements Initializable {
             "Лодка"
     );
 
-    public void addShip(ActionEvent actionEvent) {
-        int x = Integer.parseInt(cordBox.getText().charAt(0) + "");
-        int y = Integer.parseInt(cordBox.getText().charAt(1) + "");
+    public void addShip(int x, int y) {
         String direction = (String) directionBox.getValue();
         String type = (String) typeBox.getValue();
         int size = 0;
         if (type.equals("Линкор")) {
             size = 4;
-            //lincoreCounter++;
         } else if (type.equals("Крейсер")) {
             size = 3;
-            //cruiserCounter++;
         } else if (type.equals("Эсминец")) {
             size = 2;
-            //destroyersCounter++;
         } else if (type.equals("Лодка")) {
             size = 1;
-            //boatCounter++;
         }
         if (direction.equals("Вверх")) {
             bf.addShip(x,y,size,0);
@@ -75,11 +75,22 @@ public class PrimaryController implements Initializable {
         drawGrid();
     }
 
-    public void checkButton(ActionEvent actionEvent) {
-        System.out.println(bf.checkCanAdd(7,7,4,1));
-    }
 
     public void generateRandom(ActionEvent actionEvent) throws IOException {
+        /*Timeline timeline = new Timeline (
+                new KeyFrame(
+                        Duration.millis(20), //1000 мс * 60 сек = 1 мин
+                        ae -> {
+                            hbox1.setRotate(hbox1.getRotate()+1);
+                        }
+                )
+        );
+
+        timeline.setCycleCount(360); //Ограничим число повторений
+        timeline.play(); //Запускаем
+        sound = new Media(new File("src/main/resources/org/evertimes/ff.mp3").toURI().toString());
+        mediaPlayer = new MediaPlayer(sound);
+        mediaPlayer.play();*/
         bf.generateBattleField();
         drawShips();
         drawGrid();
@@ -100,7 +111,7 @@ public class PrimaryController implements Initializable {
         int y = (int) Math.round(mouseEvent.getY());
         x = x / 50;
         y = y / 50;
-        fillCell(x, y);
+        addShip(x,y);
         drawShips();
         drawGrid();
     }

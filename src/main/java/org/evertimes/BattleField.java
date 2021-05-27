@@ -1,6 +1,6 @@
 package org.evertimes;
 
-import org.evertimes.ships.ShipImpl;
+import org.evertimes.ships.Ship;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class BattleField {
     CellState[][] field = new CellState[10][10];
-    ArrayList<ShipImpl> ships = new ArrayList();
+    ArrayList<Ship> ships = new ArrayList();
     private int lincoreCounter = 0;
     private int cruiserCounter = 0;
     private int destroyersCounter = 0;
@@ -22,8 +22,17 @@ public class BattleField {
         }
     }
 
-    public ArrayList<ShipImpl> getShips() {
+    public ArrayList<Ship> getShips() {
         return ships;
+    }
+
+    public Ship getShip(Point point) {
+        for (Ship sh : ships) {
+            if (sh.isContains(point)) {
+                return sh;
+            }
+        }
+        return null;
     }
 
     public void generateBattleField() {
@@ -79,26 +88,26 @@ public class BattleField {
             Set<Point> pointSet = new HashSet<>();
             if (direction == 0) {
                 for (int i = 0; i < size; i++) {
-                    pointSet.add(new Point(x,y-i));
+                    pointSet.add(new Point(x, y - i));
                     field[x][y - i] = CellState.SHIP;
                 }
             } else if (direction == 2) {
                 for (int i = 0; i < size; i++) {
-                    pointSet.add(new Point(x,y+i));
+                    pointSet.add(new Point(x, y + i));
                     field[x][y + i] = CellState.SHIP;
                 }
             } else if (direction == 3) {
                 for (int i = 0; i < size; i++) {
-                    pointSet.add(new Point(x-i,y));
+                    pointSet.add(new Point(x - i, y));
                     field[x - i][y] = CellState.SHIP;
                 }
             } else if (direction == 1) {
                 for (int i = 0; i < size; i++) {
-                    pointSet.add(new Point(x+i,y));
+                    pointSet.add(new Point(x + i, y));
                     field[x + i][y] = CellState.SHIP;
                 }
             }
-            ships.add(new ShipImpl(pointSet,size));
+            ships.add(new Ship(pointSet, size));
         }
     }
 
@@ -137,7 +146,23 @@ public class BattleField {
                     field[x - 1][y + 1] == CellState.REGULAR &&
                     field[x + 1][y - 1] == CellState.REGULAR);
         } catch (ArrayIndexOutOfBoundsException e) {
-            if (x == 0) {
+            if (x == 0 && y == 0) {
+                return (field[x + 1][y] == CellState.REGULAR &&
+                        field[x][y + 1] == CellState.REGULAR &&
+                        field[x + 1][y + 1] == CellState.REGULAR);
+            } else if (x == 9 && y == 9) {
+                return (field[x - 1][y] == CellState.REGULAR &&
+                        field[x][y - 1] == CellState.REGULAR &&
+                        field[x - 1][y - 1] == CellState.REGULAR);
+            } else if (x == 0 && y == 9) {
+                return (field[x + 1][y] == CellState.REGULAR &&
+                        field[x][y - 1] == CellState.REGULAR &&
+                        field[x + 1][y - 1] == CellState.REGULAR);
+            }  else if (x == 9 && y == 0) {
+                return (field[x - 1][y] == CellState.REGULAR &&
+                        field[x][y + 1] == CellState.REGULAR &&
+                        field[x - 1][y + 1] == CellState.REGULAR);
+            }  else if (x == 0) {
                 return (field[x + 1][y] == CellState.REGULAR &&
                         field[x][y + 1] == CellState.REGULAR &&
                         field[x][y - 1] == CellState.REGULAR &&
@@ -149,7 +174,19 @@ public class BattleField {
                         field[x][y + 1] == CellState.REGULAR &&
                         field[x + 1][y + 1] == CellState.REGULAR &&
                         field[x - 1][y + 1] == CellState.REGULAR);
-            }else{
+            } else if (x == 9) {
+                return (field[x - 1][y] == CellState.REGULAR &&
+                        field[x][y + 1] == CellState.REGULAR &&
+                        field[x][y - 1] == CellState.REGULAR &&
+                        field[x - 1][y - 1] == CellState.REGULAR &&
+                        field[x - 1][y + 1] == CellState.REGULAR);
+            } else if (y == 9) {
+                return (field[x + 1][y] == CellState.REGULAR &&
+                        field[x - 1][y] == CellState.REGULAR &&
+                        field[x][y - 1] == CellState.REGULAR &&
+                        field[x - 1][y - 1] == CellState.REGULAR &&
+                        field[x + 1][y - 1] == CellState.REGULAR);
+            } else {
                 return false;
             }
 
@@ -159,4 +196,5 @@ public class BattleField {
     public CellState[][] getField() {
         return field;
     }
+
 }
