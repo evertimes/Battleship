@@ -7,7 +7,8 @@ public enum CellState {
     SHIP(Color.web("0x000000")),
     DESTROYED(Color.web("0xE3170A")),
     CHECKED(Color.web("0x33658A"));
-    Color color;
+    private final Color color;
+
     CellState(Color color) {
         this.color = color;
     }

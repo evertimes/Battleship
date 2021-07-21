@@ -16,15 +16,20 @@ import javafx.scene.paint.Color;
 import org.evertimes.ships.Ship;
 
 public class SecondaryController implements Initializable {
+    private static final int CELL_SIZE = 50;
+    public static final int DIRECTION_UP_CODE = 0;
+    public static final int DIRECTION_RIGHT_CODE = 1;
+    public static final int DIRECTION_DOWN_CODE = 2;
+    public static final int DIRECTION_LEFT_CODE = 3;
     public Canvas userField;
     public Canvas computerField;
-    BattleField userBattleField;
-    BattleField computerBattleField;
-    boolean checkNear = false;
-    boolean foundDirection = false;
-    Point lastPoint;
-    Point firstPoint;
-    int direction = 0;
+    private BattleField userBattleField;
+    private BattleField computerBattleField;
+    private boolean checkNear;
+    private boolean foundDirection;
+    private Point lastPoint;
+    private Point firstPoint;
+    private int direction;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -39,21 +44,21 @@ public class SecondaryController implements Initializable {
 
     void drawShips(BattleField battleField, Canvas canvas) {
         CellState[][] cs = battleField.getField();
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < BattleField.FIELD_SIZE; i++) {
+            for (int j = 0; j < BattleField.FIELD_SIZE; j++) {
                 canvas.getGraphicsContext2D().setFill(cs[i][j].getColor());
-                canvas.getGraphicsContext2D().fillRect(50 * i, 50 * j, 50, 50);
+                canvas.getGraphicsContext2D().fillRect(CELL_SIZE * i, CELL_SIZE * j, CELL_SIZE, CELL_SIZE);
             }
         }
     }
 
     void drawComputerShips(BattleField battleField, Canvas canvas) {
         CellState[][] cs = battleField.getField();
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < BattleField.FIELD_SIZE; i++) {
+            for (int j = 0; j < BattleField.FIELD_SIZE; j++) {
                 if (cs[i][j] == CellState.CHECKED || cs[i][j] == CellState.DESTROYED) {
                     canvas.getGraphicsContext2D().setFill(cs[i][j].getColor());
-                    canvas.getGraphicsContext2D().fillRect(50 * i, 50 * j, 50, 50);
+                    canvas.getGraphicsContext2D().fillRect(CELL_SIZE * i, CELL_SIZE * j, CELL_SIZE, CELL_SIZE);
                 }
             }
         }
@@ -61,9 +66,9 @@ public class SecondaryController implements Initializable {
 
     void drawGrid(Canvas canvas) {
         canvas.getGraphicsContext2D().setStroke(Color.BLACK);
-        for (int i = 0; i < 11; i++) {
-            canvas.getGraphicsContext2D().strokeLine(50 * i, 0, 50 * i, 500);
-            canvas.getGraphicsContext2D().strokeLine(0 * i, 50 * i, 500, 50 * i);
+        for (int i = 0; i < BattleField.FIELD_SIZE + 1; i++) {
+            canvas.getGraphicsContext2D().strokeLine(CELL_SIZE * i, 0, CELL_SIZE * i, CELL_SIZE * BattleField.FIELD_SIZE);
+            canvas.getGraphicsContext2D().strokeLine(0, CELL_SIZE * i, CELL_SIZE * BattleField.FIELD_SIZE, CELL_SIZE * i);
         }
     }
 
@@ -71,13 +76,12 @@ public class SecondaryController implements Initializable {
     public void pressComputerCell(MouseEvent mouseEvent) {
         int x = (int) Math.round(mouseEvent.getX());
         int y = (int) Math.round(mouseEvent.getY());
-        x = x / 50;
-        y = y / 50;
+        x = x / CELL_SIZE;
+        y = y / CELL_SIZE;
         int state = fireCell(x, y);
-        if(state == -1){
+        if (state == -1) {
             return;
-        }
-        else if (state == 1) {
+        } else if (state == 1) {
             Ship ship = computerBattleField.getShip(new Point(x, y));
             Set<Point> cords = ship.getRadiusCords();
             for (Point cord : cords) {
@@ -104,11 +108,11 @@ public class SecondaryController implements Initializable {
 
     private void endGame(boolean isWin) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Игра завершена");
-        if(isWin){
-            alert.setHeaderText("Вы выиграли :)");
-        }else {
-            alert.setHeaderText("Вы проиграли :(");
+        alert.setTitle("Game over");
+        if (isWin) {
+            alert.setHeaderText("You win :)");
+        } else {
+            alert.setHeaderText("You loose :(");
         }
         alert.showAndWait().ifPresent(rs -> {
             if (rs == ButtonType.OK) {
@@ -123,7 +127,7 @@ public class SecondaryController implements Initializable {
 
     public int fireCell(int x, int y) {
         if (computerBattleField.field[x][y] == CellState.CHECKED ||
-                computerBattleField.field[x][y] == CellState.DESTROYED){
+                computerBattleField.field[x][y] == CellState.DESTROYED) {
             return -1;
         }
         if (computerBattleField.field[x][y] == CellState.SHIP) {
@@ -145,23 +149,23 @@ public class SecondaryController implements Initializable {
         int i = 0;
         int j = 0;
         switch (direction) {
-            case 0:
+            case DIRECTION_UP_CODE:
                 j = -1;
                 break;
-            case 1:
+            case DIRECTION_RIGHT_CODE:
                 i = 1;
                 break;
-            case 2:
+            case DIRECTION_DOWN_CODE:
                 j = 1;
                 break;
-            case 3:
+            case DIRECTION_LEFT_CODE:
                 i = -1;
                 break;
         }
-        if (pt.getY() == 0 && direction == 0 ||
-                pt.getX() == 9 && direction == 1 ||
-                pt.getY() == 9 && direction == 2 ||
-                pt.getX() == 0 && direction == 3) {
+        if (pt.getY() == 0 && direction == DIRECTION_UP_CODE ||
+                pt.getX() == 9 && direction == DIRECTION_LEFT_CODE ||
+                pt.getY() == 9 && direction == DIRECTION_DOWN_CODE ||
+                pt.getX() == 0 && direction == DIRECTION_LEFT_CODE) {
             if (foundDirection) {
                 direction = (direction + 2) % 4;
                 lastPoint = firstPoint;
@@ -225,8 +229,8 @@ public class SecondaryController implements Initializable {
         int x;
         int y;
         do {
-            x = rnd.nextInt(10);
-            y = rnd.nextInt(10);
+            x = rnd.nextInt(BattleField.FIELD_SIZE);
+            y = rnd.nextInt(BattleField.FIELD_SIZE);
         } while (userBattleField.field[x][y] == CellState.CHECKED ||
                 userBattleField.field[x][y] == CellState.DESTROYED);
         if (userBattleField.field[x][y] == CellState.SHIP) {
@@ -250,8 +254,8 @@ public class SecondaryController implements Initializable {
     }
 
     boolean checkEndGame(BattleField battleField) {
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < BattleField.FIELD_SIZE; i++) {
+            for (int j = 0; j < BattleField.FIELD_SIZE; j++) {
                 if (battleField.field[i][j] == CellState.SHIP) {
                     return false;
                 }

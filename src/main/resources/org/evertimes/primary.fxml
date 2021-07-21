@@ -19,16 +19,16 @@
             <VBox maxHeight="500" spacing="20">
                 <ComboBox fx:id="typeBox">
                     <value>
-                        <String fx:value="Линкор"/>
+                        <String fx:value="Lincore"/>
                     </value>
                 </ComboBox>
                 <ComboBox fx:id="directionBox">
                     <value>
-                        <String fx:value="Вверх"/>
+                        <String fx:value="Up"/>
                     </value>
                 </ComboBox>
-                <Button fx:id="primaryButton" onAction="#switchToSecondary" text="К игре!"/>
-                <Button onAction="#generateRandom" text="Сгенерировать случайно"/>
+                <Button fx:id="primaryButton" onAction="#switchToSecondary" text="Start!"/>
+                <Button onAction="#generateRandom" text="Generate random"/>
             </VBox>
         </HBox>
     </children>

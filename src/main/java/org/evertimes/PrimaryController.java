@@ -1,119 +1,120 @@
 package org.evertimes;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
+import org.evertimes.ships.Ship;
 
 public class PrimaryController implements Initializable {
+    private static final int CELL_SIZE = 50;
+    private static final String DIRECTION_UP = "Up";
+    private static final String DIRECTION_RIGHT = "Right";
+    private static final String DIRECTION_DOWN = "Down";
+    private static final String DIRECTION_LEFT = "Left";
+    private static final int DIRECTION_UP_CODE = 0;
+    private static final int DIRECTION_RIGHT_CODE = 1;
+    private static final int DIRECTION_DOWN_CODE = 2;
+    private static final int DIRECTION_LEFT_CODE = 3;
+    private static final String SHIP_NAME_4 = "Lincore";
+    private static final String SHIP_NAME_3 = "Cruiser";
+    private static final String SHIP_NAME_2 = "Destroyer";
+    private static final String SHIP_NAME_1 = "Boat";
 
-    public TableView table;
     public Canvas canvasOne;
-    public ComboBox directionBox;
-    public ComboBox typeBox;
+    public ComboBox<String> directionBox;
+    public ComboBox<String> typeBox;
     public HBox hbox1;
-    private BattleField bf = new BattleField();
-    Media sound;
-    MediaPlayer mediaPlayer;
+    private final BattleField battleField = new BattleField();
 
-    ObservableList listDirection = FXCollections.observableArrayList(
-            "Вверх",
-            "Вниз",
-            "Влево",
-            "Вправо"
+    private final ObservableList<String> listDirection = FXCollections.observableArrayList(
+            DIRECTION_UP,
+            DIRECTION_DOWN,
+            DIRECTION_LEFT,
+            DIRECTION_RIGHT
     );
-    ObservableList listTypes = FXCollections.observableArrayList(
-            "Линкор",
-            "Крейсер",
-            "Эсминец",
-            "Лодка"
+    private final ObservableList<String> listTypes = FXCollections.observableArrayList(
+            SHIP_NAME_4,
+            SHIP_NAME_3,
+            SHIP_NAME_2,
+            SHIP_NAME_1
     );
 
     public void addShip(int x, int y) {
         String direction = (String) directionBox.getValue();
         String type = (String) typeBox.getValue();
         int size = 0;
-        if (type.equals("Линкор")) {
-            size = 4;
-        } else if (type.equals("Крейсер")) {
-            size = 3;
-        } else if (type.equals("Эсминец")) {
-            size = 2;
-        } else if (type.equals("Лодка")) {
-            size = 1;
+        if (type.equals(SHIP_NAME_4)) {
+            size = Ship.LINCORE_SIZE;
+        } else if (type.equals(SHIP_NAME_3)) {
+            size = Ship.CRUISER_SIZE;
+        } else if (type.equals(SHIP_NAME_2)) {
+            size = Ship.DESTROYERS_SIZE;
+        } else if (type.equals(SHIP_NAME_1)) {
+            size = Ship.BOAT_SIZE;
         }
-        if (direction.equals("Вверх")) {
-            if(bf.addShip(x,y,size,0)){
+        if (direction.equals(DIRECTION_UP)) {
+            if (battleField.addShip(x, y, size, DIRECTION_UP_CODE)) {
 
-            }else{
+            } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Действие невозможно");
-                alert.setHeaderText("Нельзя установить еше один корабль этого типа\n" +
-                        "или невозможно установить корабль сюда ");
+                alert.setTitle("Cant perform action");
+                alert.setHeaderText("Cant place another ship of this type\n" +
+                        "or cant place ship here");
                 alert.showAndWait().ifPresent(rs -> {
                     if (rs == ButtonType.OK) {
                         System.out.println("Pressed OK.");
                     }
                 });
             }
-        } else if (direction.equals("Вниз")) {
-            if(bf.addShip(x,y,size,2)){
+        } else if (direction.equals(DIRECTION_DOWN)) {
+            if (battleField.addShip(x, y, size, DIRECTION_DOWN_CODE)) {
 
-            }else{
+            } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Действие невозможно");
-                alert.setHeaderText("Нельзя установить еше один корабль этого типа\n" +
-                        "или невозможно установить корабль сюда ");
+                alert.setTitle("Cant perform action");
+                alert.setHeaderText("Cant place another ship of this type\n" +
+                        "or cant place ship here");
                 alert.showAndWait().ifPresent(rs -> {
                     if (rs == ButtonType.OK) {
                         System.out.println("Pressed OK.");
                     }
                 });
             }
-        } else if (direction.equals("Влево")) {
-            if(bf.addShip(x,y,size,3)){
+        } else if (direction.equals(DIRECTION_LEFT)) {
+            if (battleField.addShip(x, y, size, DIRECTION_LEFT_CODE)) {
 
-            }else{
+            } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Действие невозможно");
-                alert.setHeaderText("Нельзя установить еше один корабль этого типа\n" +
-                        "или невозможно установить корабль сюда ");
+                alert.setTitle("Cant perform action");
+                alert.setHeaderText("Cant place another ship of this type\n" +
+                        "or cant place ship here");
                 alert.showAndWait().ifPresent(rs -> {
                     if (rs == ButtonType.OK) {
                         System.out.println("Pressed OK.");
                     }
                 });
             }
-        } else if (direction.equals("Вправо")) {
-            if(bf.addShip(x,y,size,1)){
+        } else if (direction.equals(DIRECTION_RIGHT)) {
+            if (battleField.addShip(x, y, size, DIRECTION_RIGHT_CODE)) {
 
-            }else{
+            } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Действие невозможно");
-                alert.setHeaderText("Нельзя установить еше один корабль этого типа\n" +
-                        "или невозможно установить корабль сюда ");
+                alert.setTitle("Cant perform action");
+                alert.setHeaderText("Cant place another ship of this type\n" +
+                        "or cant place ship here");
                 alert.showAndWait().ifPresent(rs -> {
                     if (rs == ButtonType.OK) {
                         System.out.println("Pressed OK.");
@@ -127,7 +128,7 @@ public class PrimaryController implements Initializable {
 
 
     public void generateRandom(ActionEvent actionEvent) throws IOException {
-        bf.generateBattleField();
+        battleField.generateBattleField();
         drawShips();
         drawGrid();
         switchToSecondary();
@@ -146,19 +147,19 @@ public class PrimaryController implements Initializable {
     public void pressCell(MouseEvent mouseEvent) {
         int x = (int) Math.round(mouseEvent.getX());
         int y = (int) Math.round(mouseEvent.getY());
-        x = x / 50;
-        y = y / 50;
-        addShip(x,y);
+        x = x / CELL_SIZE;
+        y = y / CELL_SIZE;
+        addShip(x, y);
         drawShips();
         drawGrid();
     }
 
     @FXML
     private void switchToSecondary() throws IOException {
-        if(bf.getShipsCount()==10) {
-            App.setBattleField(bf);
+        if (battleField.getShipsCount() == 10) {
+            App.setBattleField(battleField);
             App.setRoot("secondary");
-        } else{
+        } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Слишком рано");
             alert.setHeaderText("Необходимо установить все 9 кораблей или же сгенерировать их случайно");
@@ -171,7 +172,7 @@ public class PrimaryController implements Initializable {
     }
 
     void drawShips() {
-        CellState[][] cs = bf.getField();
+        CellState[][] cs = battleField.getField();
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 canvasOne.getGraphicsContext2D().setFill(cs[i][j].getColor());
@@ -186,13 +187,5 @@ public class PrimaryController implements Initializable {
             canvasOne.getGraphicsContext2D().strokeLine(50 * i, 0, 50 * i, 500);
             canvasOne.getGraphicsContext2D().strokeLine(0 * i, 50 * i, 500, 50 * i);
         }
-    }
-
-    void fillCell(int x, int y) {
-        bf.getField()[x][y] = CellState.SHIP;
-    }
-
-    private Point2D calculateCellNumbers() {
-        return null;
     }
 }

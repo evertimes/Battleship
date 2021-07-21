@@ -1,5 +1,6 @@
 package org.evertimes.ships;
 
+import org.evertimes.BattleField;
 import org.evertimes.Point;
 
 import java.util.HashSet;
@@ -7,13 +8,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Ship {
-    private final int size;
-    private Set<Point> points;
+    public static final int LINCORE_SIZE = 4;
+    public static final int CRUISER_SIZE = 3;
+    public static final int DESTROYERS_SIZE = 2;
+    public static final int BOAT_SIZE = 1;
+
+    private final Set<Point> points;
     private int currentSize;
 
     public Ship(Set<Point> points, int size) {
         this.points = points;
-        this.size = size;
         this.currentSize = size;
     }
 
@@ -31,8 +35,11 @@ public class Ship {
         }
         points.forEach(radiusCords::remove);
         radiusCords = radiusCords.stream().
-                filter(i -> i.getX() >= 0 && i.getY() >= 0 && i.getX() < 10 && i.getY() < 10)
-                .collect(Collectors.toSet());
+                filter(i -> i.getX() >= 0 &&
+                        i.getY() >= 0 &&
+                        i.getX() < BattleField.FIELD_SIZE &&
+                        i.getY() < BattleField.FIELD_SIZE
+                ).collect(Collectors.toSet());
         return radiusCords;
     }
 
@@ -48,11 +55,4 @@ public class Ship {
         return points.contains(point);
     }
 
-    public int getSize() {
-        return size;
-    }
-
-    public int getCurrentSize() {
-        return currentSize;
-    }
 }

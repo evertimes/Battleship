@@ -13,7 +13,7 @@
     <children>
         <HBox spacing="40">
             <VBox spacing="20">
-                <Label text="Ваше поле:">
+                <Label text="Your battlefield:">
                     <font>
                         <Font name="System Bold" size="20.0"/>
                     </font>
@@ -21,7 +21,7 @@
                 <Canvas fx:id="userField" height="500.0" onMousePressed="#pressUserCell" width="500.0"/>
             </VBox>
             <VBox spacing="20">
-            <Label text="Поле противника:">
+            <Label text="Enemy battlefield:">
                 <font>
                     <Font name="System Bold" size="20.0"/>
                 </font>
@@ -29,7 +29,7 @@
             <Canvas fx:id="computerField" height="500.0" onMousePressed="#pressComputerCell" width="500.0"/>
             </VBox>
         </HBox>
-        <Button fx:id="secondaryButton" text="Завершить игру" onAction="#switchToPrimary"/>
+        <Button fx:id="secondaryButton" text="End game" onAction="#switchToPrimary"/>
     </children>
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
