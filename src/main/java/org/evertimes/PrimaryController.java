@@ -14,6 +14,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -63,13 +65,61 @@ public class PrimaryController implements Initializable {
             size = 1;
         }
         if (direction.equals("Вверх")) {
-            bf.addShip(x,y,size,0);
+            if(bf.addShip(x,y,size,0)){
+
+            }else{
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Действие невозможно");
+                alert.setHeaderText("Нельзя установить еше один корабль этого типа\n" +
+                        "или невозможно установить корабль сюда ");
+                alert.showAndWait().ifPresent(rs -> {
+                    if (rs == ButtonType.OK) {
+                        System.out.println("Pressed OK.");
+                    }
+                });
+            }
         } else if (direction.equals("Вниз")) {
-            bf.addShip(x,y,size,2);
+            if(bf.addShip(x,y,size,2)){
+
+            }else{
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Действие невозможно");
+                alert.setHeaderText("Нельзя установить еше один корабль этого типа\n" +
+                        "или невозможно установить корабль сюда ");
+                alert.showAndWait().ifPresent(rs -> {
+                    if (rs == ButtonType.OK) {
+                        System.out.println("Pressed OK.");
+                    }
+                });
+            }
         } else if (direction.equals("Влево")) {
-            bf.addShip(x,y,size,3);
+            if(bf.addShip(x,y,size,3)){
+
+            }else{
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Действие невозможно");
+                alert.setHeaderText("Нельзя установить еше один корабль этого типа\n" +
+                        "или невозможно установить корабль сюда ");
+                alert.showAndWait().ifPresent(rs -> {
+                    if (rs == ButtonType.OK) {
+                        System.out.println("Pressed OK.");
+                    }
+                });
+            }
         } else if (direction.equals("Вправо")) {
-            bf.addShip(x,y,size,1);
+            if(bf.addShip(x,y,size,1)){
+
+            }else{
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Действие невозможно");
+                alert.setHeaderText("Нельзя установить еше один корабль этого типа\n" +
+                        "или невозможно установить корабль сюда ");
+                alert.showAndWait().ifPresent(rs -> {
+                    if (rs == ButtonType.OK) {
+                        System.out.println("Pressed OK.");
+                    }
+                });
+            }
         }
         drawShips();
         drawGrid();
@@ -77,20 +127,6 @@ public class PrimaryController implements Initializable {
 
 
     public void generateRandom(ActionEvent actionEvent) throws IOException {
-        /*Timeline timeline = new Timeline (
-                new KeyFrame(
-                        Duration.millis(20), //1000 мс * 60 сек = 1 мин
-                        ae -> {
-                            hbox1.setRotate(hbox1.getRotate()+1);
-                        }
-                )
-        );
-
-        timeline.setCycleCount(360); //Ограничим число повторений
-        timeline.play(); //Запускаем
-        sound = new Media(new File("src/main/resources/org/evertimes/ff.mp3").toURI().toString());
-        mediaPlayer = new MediaPlayer(sound);
-        mediaPlayer.play();*/
         bf.generateBattleField();
         drawShips();
         drawGrid();
@@ -103,6 +139,7 @@ public class PrimaryController implements Initializable {
         typeBox.setItems(listTypes);
         drawShips();
         drawGrid();
+
     }
 
 
@@ -118,8 +155,19 @@ public class PrimaryController implements Initializable {
 
     @FXML
     private void switchToSecondary() throws IOException {
-        App.setBattleField(bf);
-        App.setRoot("Secondary");
+        if(bf.getShipsCount()==10) {
+            App.setBattleField(bf);
+            App.setRoot("secondary");
+        } else{
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Слишком рано");
+            alert.setHeaderText("Необходимо установить все 9 кораблей или же сгенерировать их случайно");
+            alert.showAndWait().ifPresent(rs -> {
+                if (rs == ButtonType.OK) {
+                    System.out.println("Pressed OK.");
+                }
+            });
+        }
     }
 
     void drawShips() {

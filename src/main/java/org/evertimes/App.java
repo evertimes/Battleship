@@ -20,6 +20,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         scene = new Scene(loadFXML("primary"), 1100, 680);
         stage.setScene(scene);
+        stage.setTitle("Battleship");
         stage.show();
     }
     static BattleField transferBattleField;
@@ -38,7 +39,12 @@ public class App extends Application {
     }
 
     private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+        FXMLLoader fxmlLoader;
+        if(fxml.compareTo("primary")==0) {
+         fxmlLoader=new FXMLLoader(PrimaryController.class.getResource(fxml + ".fxml"));
+        }else{
+            fxmlLoader=new FXMLLoader(SecondaryController.class.getResource(fxml + ".fxml"));
+        }
         return fxmlLoader.load();
     }
 

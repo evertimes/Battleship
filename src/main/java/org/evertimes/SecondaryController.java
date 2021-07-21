@@ -1,6 +1,5 @@
 package org.evertimes;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Random;
@@ -10,12 +9,11 @@ import java.util.Set;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import org.evertimes.ships.Ship;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 
 public class SecondaryController implements Initializable {
     public Canvas userField;
@@ -27,8 +25,6 @@ public class SecondaryController implements Initializable {
     Point lastPoint;
     Point firstPoint;
     int direction = 0;
-    Media sound;
-    MediaPlayer mediaPlayer;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -78,7 +74,10 @@ public class SecondaryController implements Initializable {
         x = x / 50;
         y = y / 50;
         int state = fireCell(x, y);
-        if (state == 1) {
+        if(state == -1){
+            return;
+        }
+        else if (state == 1) {
             Ship ship = computerBattleField.getShip(new Point(x, y));
             Set<Point> cords = ship.getRadiusCords();
             for (Point cord : cords) {
@@ -88,7 +87,7 @@ public class SecondaryController implements Initializable {
         drawComputerShips(computerBattleField, computerField);
         drawGrid(computerField);
         if (checkEndGame(computerBattleField)) {
-            endGame();
+            endGame(true);
             return;
         }
         if (!checkNear) {
@@ -99,26 +98,34 @@ public class SecondaryController implements Initializable {
         drawShips(userBattleField, userField);
         drawGrid(userField);
         if (checkEndGame(userBattleField)) {
-            userField.getGraphicsContext2D().clearRect(0, 0, 500, 500);
-            userField.getGraphicsContext2D().fillText("You loose", 50, 250);
-            computerField.getGraphicsContext2D().clearRect(0, 0, 500, 500);
-            computerField.getGraphicsContext2D().fillText("Computer wins", 50, 250);
-            return;
+            endGame(false);
         }
     }
 
-    private void endGame() {
-        userField.getGraphicsContext2D().clearRect(0, 0, 500, 500);
-        userField.getGraphicsContext2D().setStroke(Color.BLACK);
-        computerField.getGraphicsContext2D().setStroke(Color.BLACK);
-        userField.getGraphicsContext2D().setFont(Font.font(java.awt.Font.SANS_SERIF, 25));
-        userField.getGraphicsContext2D().strokeText("You win", 50, 250);
-        computerField.getGraphicsContext2D().setFont(Font.font(java.awt.Font.SANS_SERIF, 25));
-        computerField.getGraphicsContext2D().clearRect(0, 0, 500, 500);
-        computerField.getGraphicsContext2D().strokeText("Computer loose", 50, 250);
+    private void endGame(boolean isWin) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Игра завершена");
+        if(isWin){
+            alert.setHeaderText("Вы выиграли :)");
+        }else {
+            alert.setHeaderText("Вы проиграли :(");
+        }
+        alert.showAndWait().ifPresent(rs -> {
+            if (rs == ButtonType.OK) {
+                try {
+                    switchToPrimary();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public int fireCell(int x, int y) {
+        if (computerBattleField.field[x][y] == CellState.CHECKED ||
+                computerBattleField.field[x][y] == CellState.DESTROYED){
+            return -1;
+        }
         if (computerBattleField.field[x][y] == CellState.SHIP) {
             computerBattleField.field[x][y] = CellState.DESTROYED;
             Ship ship = computerBattleField.getShip(new Point(x, y));
@@ -155,8 +162,13 @@ public class SecondaryController implements Initializable {
                 pt.getX() == 9 && direction == 1 ||
                 pt.getY() == 9 && direction == 2 ||
                 pt.getX() == 0 && direction == 3) {
-            direction++;
-            direction = direction % 4;
+            if (foundDirection) {
+                direction = (direction + 2) % 4;
+                lastPoint = firstPoint;
+            } else {
+                direction++;
+                direction = direction % 4;
+            }
             computerTurn(pt);
             return;
         }
@@ -249,9 +261,6 @@ public class SecondaryController implements Initializable {
     }
 
     public void pressUserCell(MouseEvent mouseEvent) {
-        sound = new Media(new File("src/main/resources/org/evertimes/ff.mp3").toURI().toString());
-        mediaPlayer = new MediaPlayer(sound);
-        mediaPlayer.play();
     }
 
     @FXML
