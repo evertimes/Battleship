@@ -4,22 +4,32 @@
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<HBox fx:id="hbox1" alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<VBox accessibleText="Battleship" alignment="CENTER" spacing="40" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.evertimes.PrimaryController">
-        <Canvas fx:id="canvasOne" height="500.0" onMousePressed="#pressCell" width="500.0" />
-        <VBox maxHeight="500" spacing="20">
-            <ComboBox fx:id="typeBox">
-                <value>
-                <String fx:value="Линкор" />
-                </value>
-            </ComboBox>
-            <ComboBox fx:id="directionBox">
-                <value>
-                    <String fx:value="Вверх" />
-                </value>
-            </ComboBox>
-            <Button fx:id="primaryButton" onAction="#switchToSecondary" text="Переход на второй экран" />
-            <Button onAction="#generateRandom" text="Сгенерировать случайно" />
-        </VBox>
-</HBox>
+    <children>
+        <Label text="Battleship">
+            <font>
+                <Font name="System Bold" size="40.0"/>
+            </font>
+        </Label>
+        <HBox fx:id="hbox1" alignment="CENTER" spacing="20.0">
+            <Canvas fx:id="canvasOne" height="500.0" onMousePressed="#pressCell" width="500.0"/>
+            <VBox maxHeight="500" spacing="20">
+                <ComboBox fx:id="typeBox">
+                    <value>
+                        <String fx:value="Линкор"/>
+                    </value>
+                </ComboBox>
+                <ComboBox fx:id="directionBox">
+                    <value>
+                        <String fx:value="Вверх"/>
+                    </value>
+                </ComboBox>
+                <Button fx:id="primaryButton" onAction="#switchToSecondary" text="К игре!"/>
+                <Button onAction="#generateRandom" text="Сгенерировать случайно"/>
+            </VBox>
+        </HBox>
+    </children>
+</VBox>

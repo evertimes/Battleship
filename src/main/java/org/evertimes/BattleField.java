@@ -21,6 +21,9 @@ public class BattleField {
             Arrays.fill(row, CellState.REGULAR);
         }
     }
+    public int getShipsCount(){
+        return lincoreCounter+cruiserCounter+destroyersCounter+boatCounter;
+    }
 
     public ArrayList<Ship> getShips() {
         return ships;
@@ -72,7 +75,7 @@ public class BattleField {
         }
     }
 
-    void addShip(int x, int y, int size, int direction) {
+    boolean addShip(int x, int y, int size, int direction) {
         if (checkCanAdd(x, y, size, direction)) {
             if (size == 4 && lincoreCounter < 1) {
                 lincoreCounter++;
@@ -83,7 +86,7 @@ public class BattleField {
             } else if (size == 1 && boatCounter < 4) {
                 boatCounter++;
             } else {
-                return;
+                return false;
             }
             Set<Point> pointSet = new HashSet<>();
             if (direction == 0) {
@@ -108,6 +111,9 @@ public class BattleField {
                 }
             }
             ships.add(new Ship(pointSet, size));
+            return true;
+        }else{
+            return false;
         }
     }
 
